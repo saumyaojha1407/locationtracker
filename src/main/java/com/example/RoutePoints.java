@@ -18,7 +18,9 @@ public class RoutePoints {
         System.out.println(endPosition);
         //Define list to get all latlng for the route
         List<LatLng> path = new ArrayList();
-
+        Integer fixedInterval = 50;
+        Double startLat = new Double(startPosition.split(",")[0]);
+        Double startLong = new Double(startPosition.split(",")[1]);
         GeoApiContext context = new GeoApiContext.Builder()
                 .apiKey("AIzaSyAEQvKUVouPDENLkQlCF6AAap1Ze-6zMos")
                 .build();
@@ -49,14 +51,35 @@ public class RoutePoints {
                                         }
                                     }
                                 } else {
-                                    EncodedPolyline points = step.polyline;
-                                    if (points != null) {
-                                        //Decode polyline and add points to list of route coordinates
-                                        List<com.google.maps.model.LatLng> coords = points.decodePath();
-                                        for (com.google.maps.model.LatLng coord : coords) {
-                                            path.add(new LatLng(coord.lat, coord.lng));
-                                        }
+//                                    if (startLat.equals(0.0)){
+                                        startLat = step.startLocation.lat;
+                                        startLong = step.startLocation.lng;
+//                                    }
+                                    Double endLat = step.endLocation.lat;
+                                    Double endLong = step.endLocation.lng;
+                                    Double inMetres = (double)step.distance.inMeters;
+                                    Integer totalIntervals = (int)step.distance.inMeters/fixedInterval;
+                                    for (int m=0;m<=totalIntervals;m++){
+                                        Double initialX = (double)fixedInterval*m;
+                                        Double latValue = startLat + initialX*((endLat-startLat)/inMetres);
+                                        Double longValue = startLong + initialX*((endLong-startLong)/inMetres);
+                                        path.add(new LatLng(latValue, longValue));
+//                                        startLat = latValue;
+//                                        startLong = longValue;
                                     }
+//                                    for (int m=0; m<stepDistance.inMeters/fixedInterval;m++)
+
+//                                    public double interpolate(double startValue,
+//                                    double endValue,
+//                                    double fraction)
+//                                    EncodedPolyline points = step.polyline;
+//                                    if (points != null) {
+//                                        //Decode polyline and add points to list of route coordinates
+//                                        List<com.google.maps.model.LatLng> coords = points.decodePath();
+//                                        for (com.google.maps.model.LatLng coord : coords) {
+//                                            path.add(new LatLng(coord.lat, coord.lng));
+//                                        }
+//                                    }
                                 }
                             }
                         }
